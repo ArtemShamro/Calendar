@@ -1,0 +1,34 @@
+# version: "3.9"
+services:   
+  events:
+    build:
+      dockerfile: ./docker/events.dockerfile
+      context: .
+    restart: always
+    ports: 
+      - "8080:8080"
+      - "8081"
+    networks:
+      - net
+    depends_on:
+      - postgres_events
+    environment:
+      DATABASE_URL: postgres://postgres:12345@postgres_events:5432/postgres
+
+  postgres_events:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "12345"
+      POSTGRES_DB: postgres
+    volumes:
+      - ./db/db_init/events_init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "13501:5432"
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
